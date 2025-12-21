@@ -4,10 +4,9 @@ import torch
 import torch.nn as nn
 import numpy as np
 import time
-start=time.time()
+
 ds=load_dataset("Hemg/AI-Generated-vs-Real-Images-Datasets",
-                split='train',
-                streaming=True)
+                split='train')
 
 
 def gen(batch_size=32):
@@ -20,13 +19,7 @@ def gen(batch_size=32):
             yield np.stack(X),np.stack(y)
             X,y=[],[]
     
-s=next(iter(ds))
-img=np.asarray(s["image"])
-print("Image shape:",img.shape)
-end=time.time()
-print(end - start)
-model=nn.Sequential(
 
-)
+model=nn.Sequential()
 
 
