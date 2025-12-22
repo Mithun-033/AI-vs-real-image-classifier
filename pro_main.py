@@ -2,10 +2,19 @@ from datasets import load_dataset
 import torch
 import torch.nn as nn
 import numpy as np
+from sklearn.model_selection import train_test_split
 import time
 
+s1=time.time()
 ds=load_dataset("Hemg/AI-Generated-vs-Real-Images-Datasets",
                 split='train')
+e1=time.time()
+
+s2=time.time()
+x_train,x_test,y_train,y_split=train_test_split(ds['image'],ds['label'],test_size=0.3)
+e2=time.time()
+
+print(e1-s1,e2-s2,sep="\n")
 
 class CNNModel(nn.Module):
     def __init__(self,input_param):
@@ -19,14 +28,12 @@ class CNNModel(nn.Module):
         )
         self.dense_layer=nn.Sequential(
             nn.Dropout(0.2),
-            nn.Linear(_,128),
+            nn.Linear(-1,128),
             nn.LeakyReLU(),
             nn.Dropout(0.2),
             nn.Linear(128,2)
         )
         
-model=CNNModel(_)
-
 def gen(batch_size=32):
     X=[]
     y=[]
