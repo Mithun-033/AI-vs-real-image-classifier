@@ -5,16 +5,19 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import time
 
-s1=time.time()
+
 ds=load_dataset("Hemg/AI-Generated-vs-Real-Images-Datasets",
                 split='train')
-e1=time.time()
 
-s2=time.time()
-x_train,x_test,y_train,y_split=train_test_split(ds['image'],ds['label'],test_size=0.3)
-e2=time.time()
+print("done loading dataset")
+ds=ds.train_test_split(test_size=0.2,seed=42)
 
-print(e1-s1,e2-s2,sep="\n")
+x_train=ds['train']['image']
+y_train=ds['train']['label']
+x_test=ds['test']['image']
+y_test=ds['test']['label']
+
+print("done splitting dataset")
 
 class CNNModel(nn.Module):
     def __init__(self,input_param):
@@ -34,6 +37,12 @@ class CNNModel(nn.Module):
             nn.Linear(128,2)
         )
         
+    def forward(self,x):
+        x=self.conv_layer(x)
+        x.view(-1,10)
+        x=self.dense_layer(x)
+        return x
+
 def gen(batch_size=32):
     X=[]
     y=[]
