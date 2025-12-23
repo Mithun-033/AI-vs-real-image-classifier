@@ -24,10 +24,8 @@ ds=ds.with_transform(
 )
 
 ds=ds.train_test_split(test_size=0.2,seed=42)
-
 train=ds['train']
 test=ds['test']
-
 print("Data preprocessing completed.")
 
 class CNNModel(nn.Module):
@@ -44,10 +42,12 @@ class CNNModel(nn.Module):
         self.flatten=nn.Flatten()
         self.dense_layer=nn.Sequential(
             nn.Dropout(0.2),
-            nn.Linear(193600,64),
+            nn.Linear(193600,1024),
             nn.LeakyReLU(),
             nn.Dropout(0.2),
-            nn.Linear(64,2)
+            nn.Linear(1024,128),
+            nn.ReLU(),
+            nn.Linear(128,2)
         )
 
     def forward(self,x):
@@ -68,9 +68,10 @@ def gen(data,batch_size=64):
 
 model=CNNModel().to(device)
 criterion=nn.CrossEntropyLoss()
-optimizer=torch.optim.Adam(model.parameters(),lr=0.00001)
+optimizer=torch.optim.SGD(model.parameters(),lr=0.001,momentum=0.9,nesterov=True,weight_decay=1e-5)
 epoch=1
 model.train()
+countx=0
 
 for _ in range(epoch):
     for x_batch,y_batch in gen(train):
@@ -79,7 +80,8 @@ for _ in range(epoch):
         loss=criterion(output,y_batch)
         loss.backward()
         optimizer.step()
-        print(f"Epoch {_+1}/{epoch}, Loss: {loss.item()}")
+        countx+=64
+        print(f"Samples processed: {countx},Loss: {loss.item()}")
 
 print("Training completed.")
 
