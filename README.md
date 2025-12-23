@@ -22,7 +22,3 @@ This project builds a binary image classifier that learns to distinguish **real 
 - Modular and extensible codebase
 - Single-image inference support
 
----
-
-## 📁 Repository Structure
-
