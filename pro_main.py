@@ -39,17 +39,15 @@ class CNNModel(nn.Module):
             nn.BatchNorm2d(32),
             nn.Conv2d(32,64,3,stride=2),
             nn.ReLU(),
-            nn.BatchNorm2d(64),
-            nn.Conv2d(64,128,3,stride=2),
-            nn.BatchNorm2d(128)
+            nn.BatchNorm2d(64)
         )
         self.flatten=nn.Flatten()
         self.dense_layer=nn.Sequential(
             nn.Dropout(0.2),
-            nn.Linear(128*27*27,32),
+            nn.Linear(193600,64),
             nn.LeakyReLU(),
             nn.Dropout(0.2),
-            nn.Linear(32,2)
+            nn.Linear(64,2)
         )
 
     def forward(self,x):
@@ -70,7 +68,7 @@ def gen(data,batch_size=64):
 
 model=CNNModel().to(device)
 criterion=nn.CrossEntropyLoss()
-optimizer=torch.optim.SGD(model.parameters(),lr=0.0000000001)
+optimizer=torch.optim.Adam(model.parameters(),lr=0.00001)
 epoch=1
 model.train()
 
