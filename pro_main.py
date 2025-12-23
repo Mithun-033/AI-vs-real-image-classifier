@@ -10,7 +10,8 @@ device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 transform=transforms.Compose([
     transforms.Lambda(lambda img: img.convert("RGB")),
     transforms.Resize((224,224)),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5,0.5,0.5],std=[0.5,0.5,0.5])
 ])
 
 ds=load_dataset("Hemg/AI-Generated-vs-Real-Images-Datasets",split='train')
@@ -23,7 +24,7 @@ ds=ds.with_transform(
     }
 )
 
-ds=ds.train_test_split(test_size=0.2,seed=42)
+ds=ds.train_test_split(test_size=0.3,seed=42)
 train=ds['train']
 test=ds['test']
 print("Data preprocessing completed.")
@@ -33,20 +34,22 @@ class CNNModel(nn.Module):
         super(CNNModel,self).__init__()
         self.conv_layer=nn.Sequential(
             nn.Conv2d(3,32,3,stride=2),
-            nn.LeakyReLU(),
             nn.BatchNorm2d(32),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(2),
+            
+
             nn.Conv2d(32,64,3,stride=2),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
-            nn.BatchNorm2d(64)
+            nn.MaxPool2d(2)
         )
         self.flatten=nn.Flatten()
         self.dense_layer=nn.Sequential(
             nn.Dropout(0.2),
-            nn.Linear(193600,1024),
+            nn.Linear(10816,128),
             nn.LeakyReLU(),
             nn.Dropout(0.2),
-            nn.Linear(1024,128),
-            nn.ReLU(),
             nn.Linear(128,2)
         )
 
@@ -56,7 +59,7 @@ class CNNModel(nn.Module):
         x=self.dense_layer(x)
         return x
 
-def gen(data,batch_size=64):
+def gen(data,batch_size=256):
     X=[]
     y=[]
     for i in data:
@@ -69,19 +72,19 @@ def gen(data,batch_size=64):
 model=CNNModel().to(device)
 criterion=nn.CrossEntropyLoss()
 optimizer=torch.optim.SGD(model.parameters(),lr=0.001,momentum=0.9,nesterov=True,weight_decay=1e-5)
-epoch=1
+epoch=10
 model.train()
 countx=0
 
-for _ in range(epoch):
+for i in range(epoch):
     for x_batch,y_batch in gen(train):
         optimizer.zero_grad()
         output=model(x_batch)
         loss=criterion(output,y_batch)
         loss.backward()
         optimizer.step()
-        countx+=64
-        print(f"Samples processed: {countx},Loss: {loss.item()}")
+        countx+=256
+        print(f"Epoch={i+1}/{epoch}, Samples processed: {countx}, Loss: {loss.item()}")
 
 print("Training completed.")
 
