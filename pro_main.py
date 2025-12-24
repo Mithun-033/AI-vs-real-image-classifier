@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from torchvision import transforms
 import time
 from torchinfo import summary
+import matplotlib.pyplot as plt
 
 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -95,6 +96,7 @@ epoch=10
 model.train()
 countx=0
 model_train_start=time.time()
+train_loss=[]
 
 for i in range(epoch):
     train=train.shuffle(seed=i)
@@ -107,8 +109,17 @@ for i in range(epoch):
         countx+=256
         print(f"Epoch={i+1}/{epoch}, Samples processed: {countx}, Loss: {loss.item()}")
     countx=0
+    train_loss.append(loss.item())
+
 model_train_end=time.time()
-print("Training completed in {:.2f} seconds.".format(model_train_end - model_train_start))
+print(f"Training completed in {model_train_end - model_train_start:.2f} seconds.")
+
+plt.plot(range(1,epoch+1),train_loss)
+plt.xlabel("Epoch")
+plt.ylabel("Training Loss")
+plt.title("Training Loss over Epochs")
+plt.savefig("training_loss.png")
+plt.close()
 
 correct=0
 total=0
@@ -125,5 +136,5 @@ accuracy=correct/total
 print(f"Test Accuracy: {accuracy*100:.2f}%")
 
 summary(model,input_size=(1,3,224,224))
-torch.save(model.state_dict(),"cnn-beta-v4.pth")
-print("Model saved as cnn-beta-v4.pth")
+torch.save(model.state_dict(),"cnn-beta-v4-2.pth")
+print("Model saved as cnn-beta-v4-2.pth")
