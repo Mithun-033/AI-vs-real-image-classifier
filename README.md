@@ -20,5 +20,5 @@ This project builds a binary image classifier that learns to distinguish **real 
 - End-to-end training and evaluation pipeline
 - Image preprocessing and normalization
 - Modular and extensible codebase
-- Single-image inference support
+
 
